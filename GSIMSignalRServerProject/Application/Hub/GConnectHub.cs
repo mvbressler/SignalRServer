@@ -7,7 +7,7 @@ namespace GSIMSignalRServerProject.Application.Hub
 
     public class GConnectHub : Hub
     {
-        public async Task GetTypes(TypesRequest request)
+        public async Task GetTypes()
         {
             if (!IsUserAuthorized())
             {

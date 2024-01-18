@@ -44,7 +44,7 @@ namespace GSIMSignalRServerProject.Application.Controllers
                 issuer: "yourdomain.com", // Replace with your domain
                 audience: "yourdomain.com", // Replace with your domain
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(5), // Token will expire in 5 minutes
                 signingCredentials: credentials
             );
 

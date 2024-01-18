@@ -26,6 +26,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = "yourdomain.com",
             ValidAudience = "yourdomain.com",
+            
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SvNhHG3PMx_ql8g_mwwX4QXa_dQlqJjjpGgSjXKrB80\n"))
         };
         
@@ -47,7 +48,6 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -57,13 +57,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseRouting().UseEndpoints(routeBuilder =>
-{
-    routeBuilder.MapHub<GConnectHub>("/g-connect").RequireAuthorization();
-});
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<GConnectHub>("/g-connect").RequireAuthorization();
 app.MapControllers();
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (SecurityTokenExpiredException)
+    {
+        // Handle the expired token. For example:
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Token has expired.");
+    }
+});
 app.Run();

@@ -41,8 +41,8 @@ namespace GSIMSignalRServerProject.Application.Controllers
 
             var token = new JwtSecurityToken(
                 
-                issuer: "yourdomain.com", // Replace with your domain
-                audience: "yourdomain.com", // Replace with your domain
+                issuer: "127.0.0.1", // Replace with your domain
+                audience: "127.0.0.1", // Replace with your domain
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(5), // Token will expire in 5 minutes
                 signingCredentials: credentials

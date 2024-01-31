@@ -2,6 +2,7 @@
 using GSIMSignalRServerProject.Application.Hub;
 using GSIMSignalRServerProject.Domain.Enums;
 using GSIMSignalRServerProject.Domain.Models;
+using GSIMSignalRServerProject.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.ComponentModel;
@@ -67,13 +68,7 @@ public class HubInteractionController : ControllerBase
         var dict = new Dictionary<string, object>();
         dict.Add("Description", "Test event from OpenAccess");
         dict.Add("Source", "Logical Source 6");
-        await _hubContext.Clients.All.SendAsync("ExecuteMethod", new
-        {
-            MethodName = "SendIncomingEvent",
-            TypeName = "Lnl_IncomingEvent",
-            InParams = dict
-
-        });
+        await _hubContext.Clients.All.SendAsync("ExecuteMethod", ExecuteMethodGenerator.DoGenerate(TypeName));
 
         return Ok();
     }

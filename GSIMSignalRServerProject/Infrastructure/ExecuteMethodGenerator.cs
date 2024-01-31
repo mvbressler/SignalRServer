@@ -14,7 +14,9 @@ namespace GSIMSignalRServerProject.Infrastructure
             var result = new LenelCommandRequest
             {
                 TypeName = ((int)namesEnum).ToString(),
-                MethodName = "SendIn￾comingEvent"
+                MethodName = "SendIn￾comingEvent",
+                InParams = new Dictionary<string, object>(),
+                Parameters = new Dictionary<string, object>()
 
             };
             switch (namesEnum)

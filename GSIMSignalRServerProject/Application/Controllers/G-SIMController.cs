@@ -1,4 +1,5 @@
-﻿using GSIMSignalRServerProject.Domain.Models;
+﻿using System.Security.Claims;
+using GSIMSignalRServerProject.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

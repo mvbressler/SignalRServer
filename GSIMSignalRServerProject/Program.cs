@@ -1,16 +1,31 @@
+using System.Reflection;
 using System.Text;
 using GSIMSignalRServerProject.Application.Hub;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSignalR();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+// builder.Services.AddIdentity<IdentityUser, IdentityRole>(options  => {
+    
+// });
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -24,8 +39,10 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "127.0.0.1",
-            ValidAudience = "127.0.0.1",
+            ValidIssuer = "yourdomain.com",
+            ValidAudience = "yourdomain.com",
+            RequireExpirationTime = true,
+            ClockSkew = TimeSpan.Zero,
             
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SvNhHG3PMx_ql8g_mwwX4QXa_dQlqJjjpGgSjXKrB80\n"))
         };
@@ -45,7 +62,8 @@ builder.Services.AddAuthentication(options =>
             }
         };
     });
-
+builder.Services.AddAuthorization();
+// builder.Services.Add(GConnectHub);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,8 +80,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<GConnectHub>("/g-connect").RequireAuthorization();
 app.MapControllers();
+app.MapHub<GConnectHub>("/g-connect", options =>
+{
+    options.CloseOnAuthenticationExpiration = true;
+}).RequireAuthorization();
 
 app.Use(async (context, next) =>
 {

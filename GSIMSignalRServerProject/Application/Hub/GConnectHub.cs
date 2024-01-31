@@ -14,12 +14,7 @@ namespace GSIMSignalRServerProject.Application.Hub
                 throw new HubException("Unauthorized access.");
             }
 
-            var faker = new Faker();
-            var types = Enumerable.Range(1, 5)
-                .Select(_ => faker.Commerce.Product())
-                .ToArray();
-
-            await Clients.Caller.SendAsync("GetTypes", types);
+            await Clients.Caller.SendAsync("GetTypes", new { Server = "serverSignalR" });
         }
 
         public async Task GetTypeDescription(TypeDescriptionRequest request)
@@ -28,11 +23,7 @@ namespace GSIMSignalRServerProject.Application.Hub
             {
                 throw new HubException("Unauthorized access.");
             }
-            
-            var faker = new Faker();
-            var description = faker.Commerce.ProductDescription();
-
-            await Clients.Caller.SendAsync("GetTypeDescription", description);
+            await Clients.Caller.SendAsync("GetTypeDescription", new { Server = "serverSignalR", TypeName = "type"});
         }
 
         public async Task GetObjects(LenelObjectsRequest request)
@@ -41,20 +32,31 @@ namespace GSIMSignalRServerProject.Application.Hub
             {
                 throw new HubException("Unauthorized access.");
             }
-            
-            var faker = new Faker();
-            var objects = Enumerable.Range(1, request.PageSize)
-                .Select(index => new
-                {
-                    Id = index,
-                    Name = faker.Commerce.ProductName(),
-                    Description = faker.Commerce.ProductDescription()
-                })
-                .ToList();
 
-            await Clients.Caller.SendAsync("GetObjects", objects);
+            await Clients.Caller.SendAsync("GetObjects", new {
+                Server = "serverSignalR", 
+                TypeName = "type",
+                Page = 1,
+                PageSize = 50
+            });
         }
-        
+
+        public async Task ExecuteMethod(LenelCommandRequest request)
+        {
+            if (!IsUserAuthorized())
+            {
+                throw new HubException("Unauthorized access.");
+            }
+
+            await Clients.Caller.SendAsync("ExecuteMethod", new
+            {
+                MethodName = "doExecute",
+                TypeName = "type",
+                Parameters = new Dictionary<string,object>(),
+                InParams = new Dictionary<string, object>()
+            });
+        }
+
         private bool IsUserAuthorized()
         {
             // Implement your authorization logic

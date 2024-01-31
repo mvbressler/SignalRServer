@@ -12,13 +12,21 @@ namespace GSIMSignalRServerProject.Application.Controllers
     [Route("api/v1/auth")]
     public class TokenController : ControllerBase
     {
+        private readonly IConfiguration configuration;
+        private int secondsToExpireToken;
+
+
+        public TokenController (IConfiguration configuration)
+        {
+            this.configuration = configuration;
+            this.secondsToExpireToken = int.Parse(this.configuration["Token:Expiration"]!);
+        }
         [HttpPost("token")]
         public IActionResult GetToken([FromBody] LoginModel login)
         {
             if (!ValidateUser(login)) return Unauthorized();
             var tokenString = GenerateJwtToken(login.Username);
-            return Ok(new { Token = tokenString });
-
+            return Ok(new { Access_token = tokenString, expires_in = secondsToExpireToken });
         }
         
         private bool ValidateUser(LoginModel login)
@@ -41,10 +49,10 @@ namespace GSIMSignalRServerProject.Application.Controllers
 
             var token = new JwtSecurityToken(
                 
-                issuer: "127.0.0.1", // Replace with your domain
-                audience: "127.0.0.1", // Replace with your domain
+                issuer: "yourdomain.com", // Replace with your domain
+                audience: "yourdomain.com", // Replace with your domain
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(5), // Token will expire in 5 minutes
+                expires: DateTime.Now.AddSeconds(secondsToExpireToken), // Token will expire in 1 minutes
                 signingCredentials: credentials
             );
 
